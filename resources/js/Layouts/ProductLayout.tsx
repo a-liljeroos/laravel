@@ -22,6 +22,13 @@ const ProductLayout = ({ auth, children }: TProductLayout) => {
                     >
                         Products
                     </NavLink>
+                    <NavLink
+                        href={route("products.add")}
+                        active={route().current("products.add")}
+                        className="font-semibold text-xl text-gray-800 leading-tight"
+                    >
+                        Add
+                    </NavLink>
                 </>
             }
         >
