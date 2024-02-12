@@ -1,22 +1,13 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
+// layout
+import ProductLayout from "@/Layouts/ProductLayout";
 
-const Products = ({ auth }: PageProps) => {
+const Index = ({ auth }: PageProps) => {
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={
-                <>
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                        Products
-                    </h2>
-                </>
-            }
-        >
-            <Head title="Products" />
-        </AuthenticatedLayout>
+        <ProductLayout auth={auth}>
+            <div>Product Index</div>
+        </ProductLayout>
     );
 };
 
-export default Products;
+export default Index;
