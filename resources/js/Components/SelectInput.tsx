@@ -14,7 +14,7 @@ export default forwardRef(function SelectInput(
         ...props
     }: SelectHTMLAttributes<HTMLSelectElement> & {
         isFocused?: boolean;
-        optionItems: { value: string; label: string }[];
+        optionItems: { value: string | number; label: string | number }[];
     },
     ref
 ) {
