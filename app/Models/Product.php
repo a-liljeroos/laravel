@@ -11,9 +11,6 @@ class Product extends Model
     protected  $table = 'product';
     protected  $primaryKey = 'id';
     protected $casts = [
-        'tags' => 'array',
-        'category_ids' => 'array',
-        'image_urls' => 'array',
         'active' => 'boolean'
     ];
     protected  $fillable = [
