@@ -1,0 +1,18 @@
+.checkbox-group-cont {
+    border-left: 2px solid rgb(189, 189, 189);
+    margin: 8px;
+    padding: 10px;
+    padding-left: 15px;
+    div {
+        margin-bottom: 5px;
+    }
+    label {
+        cursor: pointer;
+        user-select: none;
+    }
+    input[type="checkbox"] {
+        cursor: pointer;
+        margin-left: 5px;
+        margin-right: 8px;
+    }
+}
