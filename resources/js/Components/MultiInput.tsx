@@ -1,24 +1,36 @@
 import {
-    InputHTMLAttributes,
-    useState,
+    forwardRef,
     useEffect,
+    useImperativeHandle,
     useRef,
+    useState,
     CSSProperties,
+    InputHTMLAttributes,
     LiHTMLAttributes,
+    Ref,
 } from "react";
+import { generateNumber } from "@/Pages/Functions/Functions";
 // components
+import EditButton from "./Buttons/EditButton";
 import PrimaryButton from "./Buttons/PrimaryButton";
 import TrashButton from "./Buttons/TrashButton";
-import EditButton from "./Buttons/EditButton";
+
+export type MultiInputRef = {
+    reset: () => void;
+};
 
 type TMultiInput = InputHTMLAttributes<HTMLInputElement> & {
     onChange: (values: string[]) => void;
 };
 
-const MultiInput = ({ className = "", onChange }: TMultiInput) => {
+export default forwardRef(function MultiInput(
+    { className = "", onChange, ...props }: TMultiInput,
+    ref: Ref<MultiInputRef>
+) {
     const [input, setInput] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
-    const addButtonId: string = "multi-input-save-button";
+    const idNumber = Math.floor(Math.random() * 500).toString();
+    const addButtonId: string = "multi-input-save-button-" + generateNumber();
 
     useEffect(() => {
         onChange(input);
@@ -42,6 +54,14 @@ const MultiInput = ({ className = "", onChange }: TMultiInput) => {
         };
     }, []);
 
+    useImperativeHandle(ref, () => ({
+        reset,
+    }));
+
+    const reset = () => {
+        setInput([]);
+    };
+
     return (
         <div id="multi-input-cont">
             <div className="flex">
@@ -59,6 +79,7 @@ const MultiInput = ({ className = "", onChange }: TMultiInput) => {
                     Add
                 </PrimaryButton>
                 <input
+                    {...props}
                     ref={inputRef}
                     type="text"
                     className={
@@ -86,9 +107,7 @@ const MultiInput = ({ className = "", onChange }: TMultiInput) => {
             </div>
         </div>
     );
-};
-
-export default MultiInput;
+});
 
 type IListItem = LiHTMLAttributes<HTMLLIElement> & {
     key: number;
@@ -108,9 +127,11 @@ const ListItem = ({
 
     return (
         <li key={key} style={styles} className="flex items-center gap-2 my-2 ">
-            <TrashButton onClick={trashButtonClick} />
-            <EditButton onClick={editButtonClick} />
-            <p className="ml-3">{value}</p>
+            <div className="flex gap-2">
+                <TrashButton onClick={trashButtonClick} />
+                <EditButton onClick={editButtonClick} />
+            </div>
+            <p className="ml-2 truncate text-ellipsis">{value}</p>
         </li>
     );
 };
