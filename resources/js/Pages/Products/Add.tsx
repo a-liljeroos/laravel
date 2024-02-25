@@ -1,6 +1,7 @@
 import React, { FormEventHandler, useRef } from "react";
 import { useForm } from "@inertiajs/react";
 import { generateNumberArray } from "../Functions/Functions";
+import { toast } from "react-toastify";
 // types
 import { PageProps } from "@/types";
 import { CheckBoxGroupRef } from "@/Components/CheckboxGroup";
@@ -21,6 +22,8 @@ const Add = ({ auth }: PageProps) => {
     const multiInputRef = useRef<MultiInputRef>(null);
     const multiInputRef2 = useRef<MultiInputRef>(null);
 
+    const notify = () => toast("Product added!");
+
     const { data, setData, post, processing, errors, progress, reset, cancel } =
         useForm({
             name: "",
@@ -39,7 +42,13 @@ const Add = ({ auth }: PageProps) => {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route("products.create"));
+        post(route("products.create"), {
+            preserveScroll: true,
+            onSuccess: () => {
+                resetForm();
+                notify();
+            },
+        });
     };
 
     const resetForm = () => {
