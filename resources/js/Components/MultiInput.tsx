@@ -20,20 +20,20 @@ export type MultiInputRef = {
 };
 
 type TMultiInput = InputHTMLAttributes<HTMLInputElement> & {
-    onChange: (values: string[]) => void;
+    onchange: (values: string[]) => void;
+    feed?: string[];
 };
 
 export default forwardRef(function MultiInput(
-    { className = "", onChange, ...props }: TMultiInput,
+    { className = "", onchange, feed = [], ...props }: TMultiInput,
     ref: Ref<MultiInputRef>
 ) {
-    const [input, setInput] = useState<string[]>([]);
+    const [input, setInput] = useState<string[]>(feed);
     const inputRef = useRef<HTMLInputElement>(null);
-    const idNumber = Math.floor(Math.random() * 500).toString();
     const addButtonId: string = "multi-input-save-button-" + generateNumber();
 
     useEffect(() => {
-        onChange(input);
+        onchange(input);
     }, [input]);
 
     useEffect(() => {
@@ -56,6 +56,7 @@ export default forwardRef(function MultiInput(
 
     useImperativeHandle(ref, () => ({
         reset,
+        feed,
     }));
 
     const reset = () => {
@@ -63,7 +64,7 @@ export default forwardRef(function MultiInput(
     };
 
     return (
-        <div id="multi-input-cont">
+        <div>
             <div className="flex">
                 <PrimaryButton
                     id={addButtonId}
