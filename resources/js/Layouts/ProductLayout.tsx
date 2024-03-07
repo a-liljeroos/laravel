@@ -29,6 +29,13 @@ const ProductLayout = ({ auth, children }: TProductLayout) => {
                     >
                         Add
                     </NavLink>
+                    <NavLink
+                        href={route("categories.index")}
+                        active={route().current("categories.index")}
+                        className="font-semibold text-xl text-gray-800 leading-tight"
+                    >
+                        Categories
+                    </NavLink>
                 </>
             }
         >

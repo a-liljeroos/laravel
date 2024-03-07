@@ -1,14 +1,18 @@
 import React, { FormEventHandler, useRef } from "react";
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import { generateNumberArray } from "../Functions/Functions";
+import { toast } from "react-toastify";
 // types
-import { PageProps } from "@/types";
 import { CheckBoxGroupRef } from "@/Components/CheckboxGroup";
 import { MultiInputRef } from "@/Components/MultiInput";
+import { PageProps, Product, Category } from "@/types";
 // layout
 import ProductLayout from "@/Layouts/ProductLayout";
 // components
-import CheckboxGroup from "@/Components/CheckboxGroup";
+import CheckboxGroup, {
+    generateCheckBoxList,
+} from "@/Components/CheckboxGroup";
+import EditButton from "@/Components/Buttons/EditButton";
 import InputLabel from "@/Components/InputLabel";
 import MultiInput from "@/Components/MultiInput";
 import PrimaryButton from "@/Components/Buttons/PrimaryButton";
@@ -16,42 +20,63 @@ import SelectInput from "@/Components/SelectInput";
 import TextareaInput from "@/Components/TextareaInput";
 import TextInput from "@/Components/TextInput";
 
-const Add = ({ auth }: PageProps) => {
+interface IAddProps extends PageProps {
+    product: Product;
+    categories: Category[];
+}
+const Add = ({ auth, product, categories }: IAddProps) => {
     const checkBoxRef = useRef<CheckBoxGroupRef>(null);
-    const multiInputRef = useRef<MultiInputRef>(null);
-    const multiInputRef2 = useRef<MultiInputRef>(null);
+    const multiInputTags = useRef<MultiInputRef>(null);
+    const multiInputURLs = useRef<MultiInputRef>(null);
 
     const { data, setData, post, processing, errors, progress, reset, cancel } =
-        useForm({
-            name: "",
-            description_short: "",
-            description_long: "",
-            price: "",
-            quantity: "",
-            brand_id: "",
-            category_ids: {},
-            image_urls: {},
-            tags: {},
-            ean: "",
-            warranty: 0,
-            active: true,
-        });
+        useForm(
+            product || {
+                name: "",
+                description_short: "",
+                description_long: "",
+                price: "",
+                quantity: "",
+                brand_id: "",
+                category_ids: [],
+                image_urls: [],
+                tags: [],
+                ean: "",
+                warranty: 0,
+                active: true,
+            }
+        );
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route("products.create"));
+        if (product) {
+            post(route("products.edit", product.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast("Product updated!");
+                },
+            });
+        }
+
+        post(route("products.create"), {
+            preserveScroll: true,
+            onSuccess: () => {
+                resetForm();
+                toast("Product added!");
+            },
+        });
     };
 
     const resetForm = () => {
         reset();
         checkBoxRef.current?.reset();
-        multiInputRef.current?.reset();
-        multiInputRef2.current?.reset();
+        multiInputTags.current?.reset();
+        multiInputURLs.current?.reset();
     };
 
     return (
         <ProductLayout auth={auth}>
-            <div className="py-12">
+            <div className="py-12 position-relative">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <form
@@ -116,7 +141,7 @@ const Add = ({ auth }: PageProps) => {
                                 min={0}
                                 step={0.01}
                                 onChange={(e) => {
-                                    setData("price", e.target.value);
+                                    setData("price", Number(e.target.value));
                                 }}
                             />
                             <InputLabel
@@ -131,7 +156,7 @@ const Add = ({ auth }: PageProps) => {
                                 value={data.quantity}
                                 min={0}
                                 onChange={(e) => {
-                                    setData("quantity", e.target.value);
+                                    setData("quantity", Number(e.target.value));
                                 }}
                             />
                             <InputLabel
@@ -146,32 +171,29 @@ const Add = ({ auth }: PageProps) => {
                                 value={data.brand_id}
                                 min={0}
                                 onChange={(e) => {
-                                    setData("brand_id", e.target.value);
+                                    setData("brand_id", Number(e.target.value));
                                 }}
                             />
-                            <InputLabel
-                                htmlFor="category_ids"
-                                value="Categories"
-                                error={errors.category_ids}
-                            />
+                            <div className="flex items-end my-3">
+                                <InputLabel
+                                    htmlFor="category_ids"
+                                    value="Categories"
+                                    error={errors.category_ids}
+                                />
+                                <Link href={route("categories.index")}>
+                                    <EditButton />
+                                </Link>
+                            </div>
                             <CheckboxGroup
                                 name="category_ids"
                                 ref={checkBoxRef}
-                                onChange={(e) => {
-                                    setData("category_ids", JSON.stringify(e));
+                                onchange={(e) => {
+                                    setData("category_ids", e.map(Number));
                                 }}
-                                checkBoxes={[
-                                    { label: "Category 1", value: "1" },
-                                    {
-                                        label: "Category 2",
-                                        value: "2",
-                                        checked: true,
-                                    },
-                                    { label: "Category 3", value: "3" },
-                                    { label: "Category 4", value: "4" },
-                                    { label: "Category 5", value: "5" },
-                                    { label: "Category 6", value: "6" },
-                                ]}
+                                checkBoxes={generateCheckBoxList(
+                                    categories,
+                                    product
+                                )}
                             />
                             <InputLabel
                                 htmlFor="tags"
@@ -179,9 +201,10 @@ const Add = ({ auth }: PageProps) => {
                                 error={errors.tags}
                             />
                             <MultiInput
-                                ref={multiInputRef}
-                                onChange={(e) => {
-                                    setData("tags", JSON.stringify(e));
+                                ref={multiInputTags}
+                                feed={product ? product.tags : []}
+                                onchange={(e) => {
+                                    setData("tags", e);
                                 }}
                             />
                             <InputLabel
@@ -190,9 +213,10 @@ const Add = ({ auth }: PageProps) => {
                                 error={errors.image_urls}
                             />
                             <MultiInput
-                                ref={multiInputRef2}
-                                onChange={(e) => {
-                                    setData("image_urls", JSON.stringify(e));
+                                ref={multiInputURLs}
+                                feed={product ? product.image_urls : []}
+                                onchange={(e) => {
+                                    setData("image_urls", e);
                                 }}
                             />
                             <InputLabel
